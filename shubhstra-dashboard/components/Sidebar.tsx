@@ -84,7 +84,7 @@ export default function Sidebar() {
   };
 
   const clinicName = doctorInfo?.clinic_name || 'My Clinic';
-  const initials = getInitials(doctorInfo?.clinic_name);
+  const initials = getInitials(doctorInfo?.clinic_name || null);
 
   const navItems = [
     {
