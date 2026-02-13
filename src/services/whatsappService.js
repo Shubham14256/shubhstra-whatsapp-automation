@@ -159,26 +159,6 @@ export const sendMessage = async (to, data, doctor = null) => {
     }
   }
 };
-        console.warn('⚠️  ═══════════════════════════════════════════════\n');
-      } else if (errorCode === 131026) {
-        console.warn('\n⚠️  Message Undeliverable: Recipient may have blocked the number or is not on WhatsApp');
-      } else if (errorCode === 131021) {
-        console.warn('\n⚠️  Recipient phone number not registered on WhatsApp');
-      } else {
-        console.error(`Error Code: ${errorCode}`);
-        console.error(`Error Message: ${errorMessage}`);
-      }
-    } else if (error.request) {
-      // Request made but no response
-      console.error('No response received from WhatsApp API');
-    } else {
-      // Error in request setup
-      console.error('Error:', error.message);
-    }
-
-    throw error;
-  }
-};
 
 /**
  * Send a text message
