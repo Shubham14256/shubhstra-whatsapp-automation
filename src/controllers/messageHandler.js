@@ -10,6 +10,7 @@ import { getQueueStatus, formatQueueMessage } from '../services/queueService.js'
 import { getHealthAdvice, isGreetingOrMenu, isHealthQuery } from '../services/aiService.js';
 import { getOrCreateReferralCode } from '../services/referralService.js';
 import { searchMedicalAdvice, searchAdministrativeFAQ } from '../services/knowledgeBaseService.js';
+import { startBookingConversation, handleBookingResponse, isInConversation } from '../services/appointmentBookingService.js';
 import supabase from '../config/supabaseClient.js';
 
 /**
@@ -60,6 +61,17 @@ export const handleIncomingMessage = async (from, messageBody, doctor) => {
       // Handle /network command
       if (messageBody.toLowerCase() === '/network') {
         await handleDoctorNetwork(from, doctor);
+        return;
+      }
+    }
+
+    // Check if patient is in a conversation state (e.g., booking appointment)
+    if (patient && isInConversation(patient)) {
+      console.log(`🔄 Patient in conversation state: ${patient.conversation_state}`);
+      
+      if (patient.conversation_state === 'booking_appointment') {
+        const result = await handleBookingResponse(patient, messageBody, doctor);
+        await sendTextMessage(from, result.message, doctor);
         return;
       }
     }
@@ -354,41 +366,36 @@ const sendMainMenu = async (from, doctor, language = 'en') => {
  */
 const handleBookAppointment = async (from, doctor) => {
   try {
-    console.log('📅 Fetching appointment booking link...');
-
-    // Get clinic config with calendly link
-    const { data: config, error } = await supabase
-      .from('clinic_config')
-      .select('calendly_link')
-      .eq('doctor_id', doctor.id)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      console.error('❌ Error fetching config:', error);
+    console.log('📅 Starting native appointment booking...');
+    
+    const patient = await getPatientByPhone(from);
+    
+    if (!patient) {
+      await sendTextMessage(from, 'Please send "Hi" first to register.', doctor);
+      return;
     }
-
-    const calendlyLink = config?.calendly_link;
-
-    if (calendlyLink && calendlyLink.trim().length > 0) {
-      // Send Calendly link
-      const message = `📅 *Book Your Appointment*\n\n` +
-        `Please select your preferred date and time here:\n\n` +
-        `${calendlyLink}\n\n` +
-        `We look forward to seeing you! 😊`;
-
-      await sendTextMessage(from, message, doctor);
-      console.log('✅ Calendly link sent successfully');
-    } else {
-      // Fallback: No link configured
-      const clinicPhone = doctor.phone_number || 'the clinic';
-      const message = `📅 *Book Your Appointment*\n\n` +
-        `Please contact us directly to book your appointment:\n\n` +
-        `📞 Phone: ${clinicPhone}\n\n` +
-        `Our team will help you schedule a convenient time. 😊`;
-
-      await sendTextMessage(from, message, doctor);
-      console.log('✅ Fallback booking message sent (no Calendly link configured)');
+    
+    // Start booking conversation
+    const started = await startBookingConversation(patient.id);
+    
+    if (!started) {
+      await sendTextMessage(from, 'Sorry, something went wrong. Please try again.', doctor);
+      return;
     }
+    
+    const message = `📅 *Book Your Appointment*\n\n` +
+      `When would you like to visit?\n\n` +
+      `Please share your preferred date and time.\n\n` +
+      `*Examples:*\n` +
+      `• Tomorrow 3pm\n` +
+      `• Next Monday 10am\n` +
+      `• Feb 15 at 2:30pm\n` +
+      `• Friday 4:30pm\n\n` +
+      `⏰ Clinic hours: 9 AM - 6 PM (Mon-Sat)\n\n` +
+      `(Type 'cancel' to go back to menu)`;
+    
+    await sendTextMessage(from, message, doctor);
+    console.log('✅ Booking conversation started - awaiting date/time');
   } catch (error) {
     console.error('❌ Error in handleBookAppointment:', error);
     await sendErrorMessage(from, doctor);
