@@ -98,7 +98,7 @@ app.post('/api/generate-report', async (req, res) => {
 // Webhook routes
 app.use('/', webhookRoutes);
 
-// Live Chat routes
+// Live Chat routes - Fixed infinite loop issue
 app.use('/api/live-chat', liveChatRoutes);
 
 // 404 handler
