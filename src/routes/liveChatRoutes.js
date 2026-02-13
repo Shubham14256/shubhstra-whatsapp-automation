@@ -15,16 +15,10 @@ const router = express.Router();
  */
 router.get('/messages/:patientId', async (req, res) => {
   try {
-    // TEMPORARY: Rate limit to prevent spam
-    // Return empty array to stop frontend polling
-    console.log(`📨 Fetching messages for patient: ${req.params.patientId}`);
-    
-    // Return empty messages immediately to reduce load
-    return res.json({ success: true, messages: [] });
-    
-    /* DISABLED TEMPORARILY
     const { patientId } = req.params;
     const { limit = 50 } = req.query;
+    
+    console.log(`📨 Fetching messages for patient: ${patientId}`);
     
     const { data: messages, error } = await supabase
       .from('messages')
@@ -36,7 +30,6 @@ router.get('/messages/:patientId', async (req, res) => {
     if (error) throw error;
     
     res.json({ success: true, messages: messages || [] });
-    */
   } catch (error) {
     console.error('❌ Error fetching messages:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch messages' });
