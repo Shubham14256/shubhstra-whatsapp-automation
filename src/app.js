@@ -4,10 +4,24 @@
  */
 
 import express from 'express';
+import cors from 'cors';
 import webhookRoutes from './routes/webhookRoutes.js';
 import liveChatRoutes from './routes/liveChatRoutes.js';
 
 const app = express();
+
+// CORS Configuration - Allow frontend to access API
+const corsOptions = {
+  origin: [
+    'http://localhost:3001', // Local development
+    'https://shubhstra-dashboard.vercel.app' // Production frontend
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 
 // Middleware
 app.use(express.json()); // Parse JSON request bodies

@@ -36,6 +36,9 @@ export default function PatientsPage() {
   const [doctorId, setDoctorId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // API URL from environment variable
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
   useEffect(() => {
     fetchDoctorId();
     fetchPatients();
@@ -102,7 +105,7 @@ export default function PatientsPage() {
   const fetchMessages = async () => {
     if (!selectedPatient) return;
     try {
-      const response = await fetch(`http://localhost:3000/api/live-chat/messages/${selectedPatient.id}`);
+      const response = await fetch(`${API_URL}/api/live-chat/messages/${selectedPatient.id}`);
       const data = await response.json();
       if (data.success) setMessages(data.messages);
     } catch (error) {
@@ -130,7 +133,7 @@ export default function PatientsPage() {
 
     setSending(true);
     try {
-      const response = await fetch('http://localhost:3000/api/live-chat/send', {
+      const response = await fetch(`${API_URL}/api/live-chat/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -159,7 +162,7 @@ export default function PatientsPage() {
   const handleToggleBot = async () => {
     if (!selectedPatient || !doctorId) return;
     try {
-      const response = await fetch('http://localhost:3000/api/live-chat/toggle-bot', {
+      const response = await fetch(`${API_URL}/api/live-chat/toggle-bot`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
