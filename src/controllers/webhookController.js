@@ -61,6 +61,22 @@ export const receiveMessage = async (req, res) => {
         const value = body.entry[0].changes[0].value;
         const metadata = value.metadata;
         const messages = value.messages;
+        const statuses = value.statuses;
+
+        // CRITICAL: Ignore status updates (read/delivered receipts)
+        if (statuses && statuses.length > 0) {
+          console.log('📊 Status update received (ignoring):');
+          statuses.forEach(status => {
+            console.log(`   Message ID: ${status.id}, Status: ${status.status}`);
+          });
+          return res.status(200).send('STATUS_RECEIVED');
+        }
+
+        // Only process if there are actual messages
+        if (!messages || messages.length === 0) {
+          console.log('ℹ️  No messages to process');
+          return res.status(200).send('NO_MESSAGES');
+        }
 
         // Extract the display_phone_number (the doctor's WhatsApp Business number)
         const displayPhoneNumber = metadata?.display_phone_number;

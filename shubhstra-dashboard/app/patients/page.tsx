@@ -45,12 +45,16 @@ export default function PatientsPage() {
   }, []);
 
   useEffect(() => {
-    if (selectedPatient) {
+    if (!selectedPatient) return;
+    
+    fetchMessages();
+    const interval = setInterval(() => {
       fetchMessages();
-      const interval = setInterval(fetchMessages, 3000);
-      return () => clearInterval(interval);
-    }
-  }, [selectedPatient]);
+    }, 5000); // Increased to 5 seconds to reduce load
+    
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPatient?.id]); // Only re-run when patient ID changes
 
   useEffect(() => {
     scrollToBottom();
