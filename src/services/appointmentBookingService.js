@@ -5,7 +5,7 @@
 
 import supabase from '../config/supabaseClient.js';
 import { createAppointment } from './patientService.js';
-import chrono from 'chrono-node';
+import * as chrono from 'chrono-node';
 
 /**
  * Parse natural language date/time

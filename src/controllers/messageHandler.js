@@ -10,8 +10,11 @@ import { getQueueStatus, formatQueueMessage } from '../services/queueService.js'
 import { getHealthAdvice, isGreetingOrMenu, isHealthQuery } from '../services/aiService.js';
 import { getOrCreateReferralCode } from '../services/referralService.js';
 import { searchMedicalAdvice, searchAdministrativeFAQ } from '../services/knowledgeBaseService.js';
-import { startBookingConversation, handleBookingResponse, isInConversation } from '../services/appointmentBookingService.js';
+// import { startBookingConversation, handleBookingResponse, isInConversation } from '../services/appointmentBookingService.js'; // DISABLED FOR NOW
 import supabase from '../config/supabaseClient.js';
+
+// Feature flags
+const ENABLE_NATIVE_BOOKING = false; // Set to true when ready to enable
 
 /**
  * Handle incoming text message and send appropriate response
@@ -65,8 +68,19 @@ export const handleIncomingMessage = async (from, messageBody, doctor) => {
       }
     }
 
-    // Check if patient is in a conversation state (e.g., booking appointment)
-    if (patient && isInConversation(patient)) {
+    // Check if AI bot is paused (doctor is chatting manually)
+    if (patient && patient.is_bot_paused === true) {
+      console.log('🚫 AI Bot paused for this patient - Doctor is handling manually');
+      console.log(`   Patient: ${patient.name || from}`);
+      // Don't send AI response - just save message and exit
+      await saveIncomingMessage(from, messageBody, doctor.id, patient.id);
+      return;
+    }
+
+    // NATIVE BOOKING - DISABLED FOR NOW
+    // Uncomment when ready to enable
+    /*
+    if (ENABLE_NATIVE_BOOKING && patient && isInConversation(patient)) {
       console.log(`🔄 Patient in conversation state: ${patient.conversation_state}`);
       
       if (patient.conversation_state === 'booking_appointment') {
@@ -75,6 +89,7 @@ export const handleIncomingMessage = async (from, messageBody, doctor) => {
         return;
       }
     }
+    */
 
     // Check if message is a greeting or menu request
     const greetings = ['hi', 'hello', 'hey', 'menu', 'start', 'help', 'नमस्कार', 'हॅलो'];
@@ -366,36 +381,41 @@ const sendMainMenu = async (from, doctor, language = 'en') => {
  */
 const handleBookAppointment = async (from, doctor) => {
   try {
-    console.log('📅 Starting native appointment booking...');
-    
-    const patient = await getPatientByPhone(from);
-    
-    if (!patient) {
-      await sendTextMessage(from, 'Please send "Hi" first to register.', doctor);
-      return;
+    console.log('📅 Fetching appointment booking link...');
+
+    // Get clinic config with calendly link
+    const { data: config, error } = await supabase
+      .from('clinic_config')
+      .select('calendly_link')
+      .eq('doctor_id', doctor.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('❌ Error fetching config:', error);
     }
-    
-    // Start booking conversation
-    const started = await startBookingConversation(patient.id);
-    
-    if (!started) {
-      await sendTextMessage(from, 'Sorry, something went wrong. Please try again.', doctor);
-      return;
+
+    const calendlyLink = config?.calendly_link;
+
+    if (calendlyLink && calendlyLink.trim().length > 0) {
+      // Send Calendly link
+      const message = `📅 *Book Your Appointment*\n\n` +
+        `Please select your preferred date and time here:\n\n` +
+        `${calendlyLink}\n\n` +
+        `We look forward to seeing you! 😊`;
+
+      await sendTextMessage(from, message, doctor);
+      console.log('✅ Calendly link sent successfully');
+    } else {
+      // Fallback: No link configured
+      const clinicPhone = doctor.phone_number || 'the clinic';
+      const message = `📅 *Book Your Appointment*\n\n` +
+        `Please contact us directly to book your appointment:\n\n` +
+        `📞 Phone: ${clinicPhone}\n\n` +
+        `Our team will help you schedule a convenient time. 😊`;
+
+      await sendTextMessage(from, message, doctor);
+      console.log('✅ Fallback booking message sent (no Calendly link configured)');
     }
-    
-    const message = `📅 *Book Your Appointment*\n\n` +
-      `When would you like to visit?\n\n` +
-      `Please share your preferred date and time.\n\n` +
-      `*Examples:*\n` +
-      `• Tomorrow 3pm\n` +
-      `• Next Monday 10am\n` +
-      `• Feb 15 at 2:30pm\n` +
-      `• Friday 4:30pm\n\n` +
-      `⏰ Clinic hours: 9 AM - 6 PM (Mon-Sat)\n\n` +
-      `(Type 'cancel' to go back to menu)`;
-    
-    await sendTextMessage(from, message, doctor);
-    console.log('✅ Booking conversation started - awaiting date/time');
   } catch (error) {
     console.error('❌ Error in handleBookAppointment:', error);
     await sendErrorMessage(from, doctor);
@@ -534,6 +554,34 @@ const sendErrorMessage = async (from, doctor = null) => {
     );
   } catch (sendError) {
     console.error('❌ Failed to send error message to patient:', sendError);
+  }
+};
+
+/**
+ * Save incoming message to database
+ * @param {string} from - Patient's phone number
+ * @param {string} messageBody - Message text
+ * @param {string} doctorId - Doctor's UUID
+ * @param {string} patientId - Patient's UUID
+ */
+const saveIncomingMessage = async (from, messageBody, doctorId, patientId) => {
+  try {
+    const { error } = await supabase
+      .from('messages')
+      .insert({
+        doctor_id: doctorId,
+        patient_id: patientId,
+        phone_number: from,
+        direction: 'incoming',
+        message_type: 'text',
+        message_body: messageBody,
+        created_at: new Date().toISOString()
+      });
+    
+    if (error) throw error;
+    console.log('✅ Incoming message saved to database');
+  } catch (error) {
+    console.error('❌ Error saving incoming message:', error);
   }
 };
 

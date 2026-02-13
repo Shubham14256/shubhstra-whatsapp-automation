@@ -5,6 +5,7 @@
 
 import express from 'express';
 import webhookRoutes from './routes/webhookRoutes.js';
+import liveChatRoutes from './routes/liveChatRoutes.js';
 
 const app = express();
 
@@ -82,6 +83,9 @@ app.post('/api/generate-report', async (req, res) => {
 
 // Webhook routes
 app.use('/', webhookRoutes);
+
+// Live Chat routes
+app.use('/api/live-chat', liveChatRoutes);
 
 // 404 handler
 app.use((req, res) => {

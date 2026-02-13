@@ -3,7 +3,9 @@
  * Run this to verify the setup before testing with WhatsApp
  */
 
-import { parseDateTime } from './src/services/appointmentBookingService.js';
+import * as appointmentService from './src/services/appointmentBookingService.js';
+
+const { parseDateTime } = appointmentService;
 
 console.log('🧪 Testing Native Appointment Booking Setup\n');
 
