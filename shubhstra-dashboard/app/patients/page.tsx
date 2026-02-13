@@ -148,16 +148,25 @@ export default function PatientsPage() {
       });
 
       const data = await response.json();
+      
       if (data.success) {
         setNewMessage('');
         setSelectedPatient({ ...selectedPatient, is_bot_paused: true });
         fetchMessages();
       } else {
-        alert('Failed to send message');
+        // Show error alert to doctor
+        const errorMessage = data.error || 'Failed to send message';
+        alert(`❌ Message Not Sent\n\n${errorMessage}\n\n${data.details || ''}`);
+        console.error('WhatsApp API Error:', {
+          error: data.error,
+          errorCode: data.errorCode,
+          canRetry: data.canRetry,
+          details: data.details
+        });
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Failed to send message');
+      alert('❌ Failed to send message\n\nNetwork error. Please check your connection and try again.');
     } finally {
       setSending(false);
     }

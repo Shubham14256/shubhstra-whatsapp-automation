@@ -84,20 +84,81 @@ export const sendMessage = async (to, data, doctor = null) => {
       console.error('Status:', error.response.status);
       console.error('Error Data:', JSON.stringify(error.response.data, null, 2));
 
-      // Check for 24-hour window error (Error code 131047)
-      const errorCode = error.response.data?.error?.code;
-      const errorMessage = error.response.data?.error?.message;
+      // Extract error details
+      const errorData = error.response.data?.error;
+      const errorCode = errorData?.code;
+      const errorMessage = errorData?.message;
+      const errorSubcode = errorData?.error_subcode;
 
-      if (errorCode === 131047) {
+      // Create structured error object
+      const structuredError = {
+        code: errorCode,
+        message: errorMessage,
+        subcode: errorSubcode,
+        userMessage: 'Failed to send WhatsApp message',
+        canRetry: false
+      };
+
+      // Handle specific error codes
+      if (errorCode === 131047 || errorCode === 131026) {
+        // 24-hour window expired
         console.warn('\n⚠️  ═══════════════════════════════════════════════');
-        console.warn('⚠️  24-Hour Window Closed');
+        console.warn('⚠️  24-Hour Window Expired');
         console.warn('⚠️  ═══════════════════════════════════════════════');
         console.warn(`⚠️  Recipient: ${to}`);
-        console.warn('⚠️  Message failed to send because more than 24 hours');
-        console.warn('⚠️  have passed since the customer last replied.');
-        console.warn('⚠️  ');
-        console.warn('⚠️  SOLUTION: Use a Template Message instead.');
-        console.warn('⚠️  Template messages can be sent outside the 24-hour window.');
+        console.warn('⚠️  Cannot send message - patient must reply first');
+        console.warn('⚠️  ═══════════════════════════════════════════════\n');
+        
+        structuredError.userMessage = '24-hour window expired. Patient must reply to the bot first before you can send messages.';
+        structuredError.canRetry = false;
+      } else if (errorCode === 131031) {
+        // Invalid phone number
+        structuredError.userMessage = 'Invalid phone number format';
+        structuredError.canRetry = false;
+      } else if (errorCode === 131051) {
+        // Message undeliverable
+        structuredError.userMessage = 'Message undeliverable. Number may be invalid or blocked.';
+        structuredError.canRetry = false;
+      } else if (errorCode === 100) {
+        // Invalid parameter
+        structuredError.userMessage = 'Invalid message format';
+        structuredError.canRetry = false;
+      } else if (errorCode === 190) {
+        // Access token expired
+        structuredError.userMessage = 'WhatsApp access token expired. Please contact admin.';
+        structuredError.canRetry = false;
+      }
+
+      // Throw structured error
+      const err = new Error(structuredError.userMessage);
+      err.whatsappError = structuredError;
+      err.originalError = error.response.data;
+      throw err;
+    } else if (error.request) {
+      // Request made but no response
+      console.error('No response received from WhatsApp API');
+      const err = new Error('WhatsApp API not responding. Please try again.');
+      err.whatsappError = {
+        code: 'NO_RESPONSE',
+        message: 'No response from WhatsApp API',
+        userMessage: 'WhatsApp API not responding. Please try again.',
+        canRetry: true
+      };
+      throw err;
+    } else {
+      // Error in request setup
+      console.error('Error:', error.message);
+      const err = new Error('Failed to send message. Please try again.');
+      err.whatsappError = {
+        code: 'REQUEST_ERROR',
+        message: error.message,
+        userMessage: 'Failed to send message. Please try again.',
+        canRetry: true
+      };
+      throw err;
+    }
+  }
+};
         console.warn('⚠️  ═══════════════════════════════════════════════\n');
       } else if (errorCode === 131026) {
         console.warn('\n⚠️  Message Undeliverable: Recipient may have blocked the number or is not on WhatsApp');

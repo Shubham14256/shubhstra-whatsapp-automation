@@ -96,7 +96,31 @@ router.post('/send', async (req, res) => {
     
     // Send WhatsApp message
     console.log(`📱 Sending WhatsApp message to: ${patient.phone_number}`);
-    await sendTextMessage(patient.phone_number, messageBody, doctor);
+    
+    try {
+      await sendTextMessage(patient.phone_number, messageBody, doctor);
+    } catch (whatsappError) {
+      // WhatsApp API error - return structured error to frontend
+      console.error('❌ WhatsApp API error:', whatsappError.message);
+      
+      if (whatsappError.whatsappError) {
+        // Structured error from WhatsApp service
+        return res.status(400).json({
+          success: false,
+          error: whatsappError.whatsappError.userMessage,
+          errorCode: whatsappError.whatsappError.code,
+          canRetry: whatsappError.whatsappError.canRetry,
+          details: whatsappError.whatsappError.message
+        });
+      }
+      
+      // Generic error
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to send WhatsApp message. Please try again.',
+        canRetry: true
+      });
+    }
     
     // Save to database
     const { error: saveError } = await supabase
