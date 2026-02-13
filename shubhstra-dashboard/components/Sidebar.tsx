@@ -60,6 +60,22 @@ export default function Sidebar() {
 
       if (error) {
         console.error('Error fetching doctor info:', error);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+        
+        // If doctor not found (PGRST116), set default values
+        if (error.code === 'PGRST116') {
+          console.warn('Doctor record not found for email:', user.email);
+          setDoctorInfo({
+            clinic_name: 'My Clinic',
+            name: user.email?.split('@')[0] || 'Doctor',
+          });
+        }
+        
         setLoading(false);
         return;
       }
