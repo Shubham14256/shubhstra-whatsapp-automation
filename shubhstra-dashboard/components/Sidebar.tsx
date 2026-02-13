@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Users, Calendar, Network, Megaphone, ListOrdered, FileText, Settings, LogOut } from 'lucide-react';
+import { Home, Users, Calendar, Network, Megaphone, ListOrdered, FileText, Settings, LogOut, Menu, X } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { useState, useEffect } from 'react';
 
@@ -18,6 +18,7 @@ export default function Sidebar() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [doctorInfo, setDoctorInfo] = useState<DoctorInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchDoctorInfo();
@@ -164,68 +165,107 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-10">
-      {/* Clinic Branding Header */}
-      <div className="p-6 border-b border-gray-100">
-        {loading ? (
-          // Loading skeleton
-          <div className="animate-pulse">
-            <div className="flex items-center space-x-3 mb-2">
-              <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-              <div className="flex-1">
-                <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            </div>
+    <>
+      {/* Mobile Header with Hamburger */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-white shadow-md z-50 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-md">
+            <span className="text-white font-bold text-sm">{initials}</span>
           </div>
-        ) : (
-          <div className="flex items-center space-x-3">
-            {/* Dynamic Avatar with Initials */}
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-lg">{initials}</span>
-            </div>
-            
-            {/* Clinic Name */}
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold text-gray-800 truncate">{clinicName}</h1>
-              <p className="text-xs text-gray-500">Dashboard</p>
-            </div>
+          <div>
+            <h1 className="text-base font-bold text-gray-800 truncate">{clinicName}</h1>
+            <p className="text-xs text-gray-500">Dashboard</p>
           </div>
-        )}
-      </div>
-
-      <nav className="mt-6">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`w-full px-6 py-3 flex items-center space-x-3 transition-colors ${
-                isActive
-                  ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              <span className="font-medium">{item.name}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Logout Button */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
+        </div>
         <button
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className="w-full px-6 py-3 flex items-center space-x-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          <LogOut className="w-5 h-5" />
-          <span className="font-medium">{loggingOut ? 'Logging out...' : 'Logout'}</span>
+          {mobileMenuOpen ? (
+            <X className="w-6 h-6 text-gray-700" />
+          ) : (
+            <Menu className="w-6 h-6 text-gray-700" />
+          )}
         </button>
       </div>
-    </aside>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Desktop & Mobile Slide-in */}
+      <aside className={`
+        fixed top-0 h-full w-64 bg-white shadow-lg z-50 transition-transform duration-300 ease-in-out
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0 md:left-0
+      `}>
+        {/* Clinic Branding Header */}
+        <div className="p-6 border-b border-gray-100">
+          {loading ? (
+            // Loading skeleton
+            <div className="animate-pulse">
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-3">
+              {/* Dynamic Avatar with Initials */}
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-lg">{initials}</span>
+              </div>
+              
+              {/* Clinic Name */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg font-bold text-gray-800 truncate">{clinicName}</h1>
+                <p className="text-xs text-gray-500">Dashboard</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <nav className="mt-6 pb-20 overflow-y-auto h-[calc(100vh-200px)]">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`w-full px-6 py-3 flex items-center space-x-3 transition-colors ${
+                  isActive
+                    ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="font-medium">{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Logout Button */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="w-full px-6 py-3 flex items-center space-x-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">{loggingOut ? 'Logging out...' : 'Logout'}</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

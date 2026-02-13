@@ -80,21 +80,21 @@ export default function PatientsPage() {
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
 
-      <main className="ml-64 p-8">
+      <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
         {/* Header */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">Patients</h2>
-          <p className="text-gray-600">View and manage your patient database</p>
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Patients</h2>
+          <p className="text-sm md:text-base text-gray-600">View and manage your patient database</p>
         </div>
 
         {/* Search Bar */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <input
             type="text"
             placeholder="Search by name or phone number..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-full px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base"
           />
         </div>
 
@@ -104,7 +104,8 @@ export default function PatientsPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -165,6 +166,47 @@ export default function PatientsPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-gray-200">
+              {filteredPatients.length === 0 ? (
+                <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                  {searchTerm ? 'No patients found matching your search' : 'No patients yet'}
+                </div>
+              ) : (
+                filteredPatients.map((patient) => (
+                  <div key={patient.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <h3 className="text-base font-semibold text-gray-900">
+                          {patient.name || 'Unknown'}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">{patient.phone_number}</p>
+                      </div>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          patient.is_active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {patient.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center text-gray-600">
+                        <span className="font-medium w-24">Email:</span>
+                        <span>{patient.email || 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600">
+                        <span className="font-medium w-24">Last Seen:</span>
+                        <span>{formatDate(patient.last_seen_at)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}

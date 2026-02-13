@@ -219,20 +219,20 @@ export default function AppointmentsPage() {
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
 
-      <main className="ml-64 p-8">
+      <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
         {/* Header */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">Appointments</h2>
-          <p className="text-gray-600">Manage all patient appointments</p>
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Appointments</h2>
+          <p className="text-sm md:text-base text-gray-600">Manage all patient appointments</p>
         </div>
 
         {/* Filter Buttons */}
-        <div className="mb-6 flex gap-2">
+        <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
           {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-3 md:px-4 py-2 rounded-lg transition-colors whitespace-nowrap text-sm md:text-base ${
                 filter === status
                   ? 'bg-primary-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100'
@@ -248,7 +248,93 @@ export default function AppointmentsPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <>
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {filteredAppointments.length === 0 ? (
+                <div className="bg-white rounded-lg shadow-md p-8 text-center text-gray-500">
+                  No appointments found
+                </div>
+              ) : (
+                filteredAppointments.map((appointment) => (
+                  <div key={appointment.id} className="bg-white rounded-lg shadow-md p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {appointment.patients?.name || 'Unknown'}
+                        </h3>
+                        <p className="text-sm text-gray-500">{appointment.patients?.phone_number || 'N/A'}</p>
+                      </div>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          appointment.status
+                        )}`}
+                      >
+                        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm mb-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Time:</span>
+                        <span className="text-gray-900 font-medium">{formatDate(appointment.appointment_time)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Payment:</span>
+                        <span
+                          className={`px-2 py-0.5 text-xs font-semibold rounded-full ${getPaymentStatusColor(
+                            appointment.payment_status || 'pending'
+                          )}`}
+                        >
+                          {(appointment.payment_status || 'pending').charAt(0).toUpperCase() + 
+                           (appointment.payment_status || 'pending').slice(1)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Balance:</span>
+                        <span className="text-gray-900 font-semibold">{formatCurrency(appointment.balance_amount || 0)}</span>
+                      </div>
+                      {appointment.notes && (
+                        <div className="pt-2 border-t">
+                          <span className="text-gray-600">Notes:</span>
+                          <p className="text-gray-900 text-xs mt-1">{appointment.notes}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      {appointment.status === 'pending' && (
+                        <button
+                          onClick={() => updateAppointmentStatus(appointment.id, 'confirmed')}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm transition-colors"
+                        >
+                          Confirm
+                        </button>
+                      )}
+                      {appointment.status === 'confirmed' && (
+                        <button
+                          onClick={() => updateAppointmentStatus(appointment.id, 'completed')}
+                          className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm transition-colors"
+                        >
+                          Complete
+                        </button>
+                      )}
+                      {appointment.payment_status !== 'paid' && (
+                        <button
+                          onClick={() => handleOpenPaymentModal(appointment)}
+                          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-md text-sm transition-colors"
+                        >
+                          Update Payment
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block bg-white rounded-lg shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -366,12 +452,13 @@ export default function AppointmentsPage() {
               </table>
             </div>
           </div>
+          </>
         )}
 
         {/* Payment Modal */}
         {showPaymentModal && selectedAppointment && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 md:p-8 max-w-md w-full">
               <h3 className="text-2xl font-bold text-gray-800 mb-6">Update Payment</h3>
               
               <div className="mb-4">

@@ -153,18 +153,18 @@ export default function NetworkPage() {
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
 
-      <main className="ml-64 p-8">
+      <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
+        <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-gray-800">Doctor Network</h2>
-            <p className="text-gray-600">Manage external doctor referrals and commissions</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Doctor Network</h2>
+            <p className="text-sm md:text-base text-gray-600">Manage external doctor referrals and commissions</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+            className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors text-sm md:text-base"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             <span>Add New Doctor</span>
@@ -177,7 +177,8 @@ export default function NetworkPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto -mx-4 md:mx-0">
+              <div className="inline-block min-w-full align-middle px-4 md:px-0">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -247,14 +248,15 @@ export default function NetworkPage() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
 
         {/* Add Doctor Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 md:p-8 max-w-md w-full">
               <h3 className="text-2xl font-bold text-gray-800 mb-6">Add New Doctor</h3>
               
               <form onSubmit={handleAddDoctor}>

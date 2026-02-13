@@ -178,12 +178,12 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
 
-      {/* Main Content */}
-      <main className="ml-64 p-8">
+      {/* Main Content - Add padding for mobile header */}
+      <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
         {/* Header */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">Dashboard</h2>
-          <p className="text-gray-600">Welcome back! Here's what's happening today.</p>
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Dashboard</h2>
+          <p className="text-sm md:text-base text-gray-600">Welcome back! Here's what's happening today.</p>
         </div>
 
         {loading ? (
@@ -192,8 +192,8 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Stats Cards - Mobile: Stack vertically, Desktop: 3 columns */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
               {/* Total Patients */}
               <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
                 <div className="flex items-center justify-between">
@@ -243,60 +243,62 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Actions & QR Code */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Quick Actions & QR Code - Mobile: Stack, Desktop: Side by side */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
               {/* Quick Actions */}
-              <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
-                <div className="flex gap-4">
-                  <button className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-4 md:p-6">
+                <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+                <div className="flex gap-3 md:gap-4 overflow-x-auto pb-2">
+                  <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg flex items-center space-x-2 transition-colors whitespace-nowrap text-sm md:text-base">
+                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                     </svg>
-                    <span>Send Health Tip Broadcast</span>
+                    <span className="hidden sm:inline">Send Health Tip Broadcast</span>
+                    <span className="sm:hidden">Broadcast</span>
                   </button>
                 </div>
               </div>
 
               {/* Connect Patients - QR Code */}
-              <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg shadow-md p-6 text-white">
-                <h3 className="text-lg font-semibold mb-4">Connect Patients</h3>
-                <div className="bg-white p-4 rounded-lg mb-4">
+              <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg shadow-md p-4 md:p-6 text-white">
+                <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Connect Patients</h3>
+                <div className="bg-white p-3 md:p-4 rounded-lg mb-3 md:mb-4 flex justify-center">
                   {doctorPhone ? (
                     <QRCode
                       value={`https://wa.me/${doctorPhone}`}
-                      size={160}
+                      size={120}
+                      className="w-full max-w-[120px] md:max-w-[160px]"
                       style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                      viewBox={`0 0 160 160`}
+                      viewBox={`0 0 120 120`}
                     />
                   ) : (
-                    <div className="w-40 h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+                    <div className="w-32 h-32 md:w-40 md:h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-xs md:text-sm">
                       Loading QR...
                     </div>
                   )}
                 </div>
                 {doctorPhone && (
-                  <div className="text-center mb-3">
+                  <div className="text-center mb-2 md:mb-3">
                     <p className="text-xs opacity-75 mb-1">WhatsApp Number</p>
-                    <p className="text-sm font-mono font-semibold">
+                    <p className="text-xs md:text-sm font-mono font-semibold">
                       +{doctorPhone.slice(0, 2)} {doctorPhone.slice(2, 7)} {doctorPhone.slice(7)}
                     </p>
                   </div>
                 )}
-                <p className="text-sm text-center">
+                <p className="text-xs md:text-sm text-center">
                   📱 Scan to Chat with {doctorName ? `Dr. ${doctorName}'s` : 'Shubhstra'} Bot
                 </p>
               </div>
             </div>
 
-            {/* Recent Appointments Table */}
+            {/* Recent Appointments Table - Mobile: Horizontal scroll */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800">Recent Appointments</h3>
+              <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200">
+                <h3 className="text-base md:text-lg font-semibold text-gray-800">Recent Appointments</h3>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full min-w-[640px]">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

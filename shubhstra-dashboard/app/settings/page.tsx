@@ -252,11 +252,11 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
 
-      <main className="ml-64 p-8">
+      <main className="md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
         {/* Header */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">Clinic Settings</h2>
-          <p className="text-gray-600">Manage your clinic configuration and preferences</p>
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Clinic Settings</h2>
+          <p className="text-sm md:text-base text-gray-600">Manage your clinic configuration and preferences</p>
         </div>
 
         {loading ? (
@@ -266,13 +266,13 @@ export default function SettingsPage() {
         ) : (
           <form onSubmit={handleSave} className="space-y-6">
             {/* Clinic Identity Section */}
-            <div className="bg-white rounded-lg shadow-md p-8">
-              <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-200">
-                <Building2 className="w-6 h-6 text-primary-600" />
-                <h3 className="text-xl font-bold text-gray-800">Clinic Identity</h3>
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-8">
+              <div className="flex items-center space-x-3 mb-4 md:mb-6 pb-4 border-b border-gray-200">
+                <Building2 className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
+                <h3 className="text-lg md:text-xl font-bold text-gray-800">Clinic Identity</h3>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 {/* Clinic Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -350,13 +350,13 @@ export default function SettingsPage() {
             </div>
 
             {/* Configuration Section */}
-            <div className="bg-white rounded-lg shadow-md p-8">
-              <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-200">
-                <Clock className="w-6 h-6 text-primary-600" />
-                <h3 className="text-xl font-bold text-gray-800">Clinic Configuration</h3>
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-8">
+              <div className="flex items-center space-x-3 mb-4 md:mb-6 pb-4 border-b border-gray-200">
+                <Clock className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
+                <h3 className="text-lg md:text-xl font-bold text-gray-800">Clinic Configuration</h3>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 {/* Opening & Closing Time - Side by Side */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Opening Time */}
@@ -409,15 +409,15 @@ export default function SettingsPage() {
             </div>
 
             {/* Appointment & Review Links Section */}
-            <div className="bg-white rounded-lg shadow-md p-8">
-              <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-200">
-                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-8">
+              <div className="flex items-center space-x-3 mb-4 md:mb-6 pb-4 border-b border-gray-200">
+                <svg className="w-5 h-5 md:w-6 md:h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
-                <h3 className="text-xl font-bold text-gray-800">Appointment & Review Links</h3>
+                <h3 className="text-lg md:text-xl font-bold text-gray-800">Appointment & Review Links</h3>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 {/* Calendly Link */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -475,7 +475,7 @@ export default function SettingsPage() {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center space-x-2 shadow-md"
+                className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white px-6 md:px-8 py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center space-x-2 shadow-md text-sm md:text-base"
                 disabled={saving}
               >
                 {saving ? (
@@ -485,7 +485,7 @@ export default function SettingsPage() {
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     <span>Save All Settings</span>
@@ -497,12 +497,12 @@ export default function SettingsPage() {
             {/* Info Box */}
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="flex items-start space-x-3">
-                <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
                   <h4 className="text-sm font-semibold text-blue-900 mb-1">Settings Guide</h4>
-                  <ul className="text-sm text-blue-800 space-y-1">
+                  <ul className="text-xs md:text-sm text-blue-800 space-y-1">
                     <li>• Clinic identity and welcome message are displayed to patients</li>
                     <li>• Consultation fee is used as default for new appointments</li>
                     <li>• Opening/closing times control appointment scheduling</li>
